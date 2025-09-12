@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsString,
-  IsOptional,
-  IsUUID,
-  IsObject,
-} from 'class-validator';
+import { IsEmail, IsString, IsOptional, IsUUID } from 'class-validator';
 
 export class UserQueryDto {
   @IsOptional()
@@ -31,7 +25,7 @@ export class UserQueryDto {
    * Validate that at least one field is provided
    */
   static validate(data: any): { isValid: boolean; message: string } {
-    if (!data || !IsObject(data)) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
       return {
         isValid: false,
         message: 'Request body must be a JavaScript object',
