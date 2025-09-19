@@ -12,6 +12,12 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
 
+  // Enable CORS
+  app.enableCors({
+    origin: true, // Allow all origins in development
+    credentials: true,
+  });
+
   // Apply JWT auth guard globally with exception for /users POST route
   const reflector = app.get(Reflector);
   app.useGlobalGuards(new JwtAuthGuard(reflector));
