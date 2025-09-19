@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { OpenaiModule } from './openai/openai.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { LearningPlansModule } from './learning-plans/learning-plans.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     OpenaiModule,
     AuthModule,
+    LearningPlansModule,
   ],
   controllers: [AppController],
   providers: [AppService],
