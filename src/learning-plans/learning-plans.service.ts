@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 import { LearningPlan, LearningPlanDocument } from './schemas/learning-plan.schema';
 import { CreateLearningPlanDto } from './dto/create-learning-plan.dto';
 import { UpdateLearningPlanDto } from './dto/update-learning-plan.dto';
+import { UpdatePhaseStatusDto } from './dto/update-phase-status.dto';
+import { UpdateTopicStatusDto } from './dto/update-topic-status.dto';
 
 @Injectable()
 export class LearningPlansService {
@@ -113,6 +115,107 @@ export class LearningPlansService {
       return { message: 'Learning plan deleted successfully' };
     } catch (error) {
       console.error('Error deleting learning plan:', error);
+      throw error;
+    }
+  }
+
+  async updatePhaseStatus(
+    updatePhaseStatusDto: UpdatePhaseStatusDto,
+  ): Promise<LearningPlan> {
+    try {
+      const { learningPlanId, phaseName, status } = updatePhaseStatusDto;
+      
+      // First, check if the learning plan exists
+      const learningPlan = await this.learningPlanModel.findById(learningPlanId).exec();
+      if (!learningPlan) {
+        throw new NotFoundException(`Learning plan with ID ${learningPlanId} not found`);
+      }
+
+      // Check if the phase exists
+      const phaseExists = learningPlan.phases.some(phase => phase.focus === phaseName);
+      if (!phaseExists) {
+        throw new NotFoundException(`Phase with name '${phaseName}' not found in learning plan`);
+      }
+
+      // Update the phase status using MongoDB positional operator
+      const updatedLearningPlan = await this.learningPlanModel
+        .findOneAndUpdate(
+          {
+            _id: learningPlanId,
+            'phases.focus': phaseName
+          },
+          {
+            $set: {
+              'phases.$.status': status
+            }
+          },
+          { new: true }
+        )
+        .exec();
+
+      if (!updatedLearningPlan) {
+        throw new NotFoundException(`Failed to update phase status`);
+      }
+
+      return updatedLearningPlan;
+    } catch (error) {
+      console.error('Error updating phase status:', error);
+      throw error;
+    }
+  }
+
+  async updateTopicStatus(
+    updateTopicStatusDto: UpdateTopicStatusDto,
+  ): Promise<LearningPlan> {
+    try {
+      const { learningPlanId, topicTitle, status } = updateTopicStatusDto;
+      
+      // First, check if the learning plan exists
+      const learningPlan = await this.learningPlanModel.findById(learningPlanId).exec();
+      if (!learningPlan) {
+        throw new NotFoundException(`Learning plan with ID ${learningPlanId} not found`);
+      }
+
+      // Check if the topic exists in any phase
+      let topicExists = false;
+      for (const phase of learningPlan.phases) {
+        if (phase.topics.some(topic => topic.title === topicTitle)) {
+          topicExists = true;
+          break;
+        }
+      }
+
+      if (!topicExists) {
+        throw new NotFoundException(`Topic with title '${topicTitle}' not found in learning plan`);
+      }
+
+      // Update the topic status using MongoDB array filters
+      const updatedLearningPlan = await this.learningPlanModel
+        .findOneAndUpdate(
+          {
+            _id: learningPlanId,
+          },
+          {
+            $set: {
+              'phases.$[].topics.$[topic].status': status
+            }
+          },
+          {
+            arrayFilters: [
+              { 'topic.title': topicTitle }
+            ],
+            new: true
+          }
+        )
+        .exec();
+
+      if (!updatedLearningPlan) {
+        throw new NotFoundException(`Failed to update topic status`);
+      }
+
+      return updatedLearningPlan;
+    } catch (error) {
+      console.error('Error updating topic status:', error);
       throw error;
     }
   }

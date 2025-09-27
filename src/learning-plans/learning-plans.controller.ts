@@ -13,6 +13,8 @@ import {
 import { LearningPlansService } from './learning-plans.service';
 import { CreateLearningPlanDto } from './dto/create-learning-plan.dto';
 import { UpdateLearningPlanDto } from './dto/update-learning-plan.dto';
+import { UpdatePhaseStatusDto } from './dto/update-phase-status.dto';
+import { UpdateTopicStatusDto } from './dto/update-topic-status.dto';
 
 @Controller('learning-plans')
 export class LearningPlansController {
@@ -54,5 +56,17 @@ export class LearningPlansController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.learningPlansService.remove(id);
+  }
+
+  @Post('phases/status')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async updatePhaseStatus(@Body() updatePhaseStatusDto: UpdatePhaseStatusDto) {
+    return this.learningPlansService.updatePhaseStatus(updatePhaseStatusDto);
+  }
+
+  @Post('topics/status')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async updateTopicStatus(@Body() updateTopicStatusDto: UpdateTopicStatusDto) {
+    return this.learningPlansService.updateTopicStatus(updateTopicStatusDto);
   }
 }
