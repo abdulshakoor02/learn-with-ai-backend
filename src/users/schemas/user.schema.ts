@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 export type UserDocument = User &
   Document & {
     comparePassword(candidatePassword: string): Promise<boolean>;
+    toObject(): any;
   };
 
 @Schema({

@@ -17,6 +17,12 @@ import { AuthService } from '../auth/auth.service';
 import { User } from './schemas/user.schema';
 import { UserQueryDto } from './dto/user-query.dto';
 
+// Helper function to remove password from user object
+function excludePassword(user: any): Omit<User, 'password'> {
+  const { password, ...userWithoutPassword } = user;
+  return userWithoutPassword as Omit<User, 'password'>;
+}
+
 @Controller('users')
 export class UsersController {
   constructor(
@@ -33,28 +39,39 @@ export class UsersController {
       mobile: string;
       password: string;
     },
-  ): Promise<User> {
-    return this.usersService.create(userData);
+  ): Promise<Omit<User, 'password'>> {
+    const user = await this.usersService.create(userData);
+    return excludePassword(user);
   }
 
   @Get()
-  async findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  async findAll(): Promise<Omit<User, 'password'>[]> {
+    const users = await this.usersService.findAll();
+    return users.map(user => excludePassword(user));
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<User | null> {
-    return this.usersService.findById(id);
+  async findById(@Param('id') id: string): Promise<Omit<User, 'password'> | null> {
+    const user = await this.usersService.findById(id);
+    if (!user) return null;
+    const userObj = user.toObject ? user.toObject() : user;
+    return excludePassword(userObj);
   }
 
   @Get('email/:email')
-  async findByEmail(@Param('email') email: string): Promise<User | null> {
-    return this.usersService.findByEmail(email);
+  async findByEmail(@Param('email') email: string): Promise<Omit<User, 'password'> | null> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) return null;
+    const userObj = user.toObject ? user.toObject() : user;
+    return excludePassword(userObj);
   }
 
   @Get('mobile/:mobile')
-  async findByMobile(@Param('mobile') mobile: string): Promise<User | null> {
-    return this.usersService.findByMobile(mobile);
+  async findByMobile(@Param('mobile') mobile: string): Promise<Omit<User, 'password'> | null> {
+    const user = await this.usersService.findByMobile(mobile);
+    if (!user) return null;
+    const userObj = user.toObject ? user.toObject() : user;
+    return excludePassword(userObj);
   }
 
   @Put(':id')
@@ -67,8 +84,11 @@ export class UsersController {
       mobile: string;
       password: string;
     }>,
-  ): Promise<User | null> {
-    return this.usersService.update(id, updateData);
+  ): Promise<Omit<User, 'password'> | null> {
+    const user = await this.usersService.update(id, updateData);
+    if (!user) return null;
+    const userObj = user.toObject ? user.toObject() : user;
+    return excludePassword(userObj);
   }
 
   @Delete(':id')
@@ -86,7 +106,7 @@ export class UsersController {
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async findByMultipleParams(
     @Body() queryParams: UserQueryDto,
-  ): Promise<User | null> {
+  ): Promise<Omit<User, 'password'> | null> {
     const validation = UserQueryDto.validate(queryParams);
     if (!validation.isValid) {
       throw new HttpException(
@@ -102,6 +122,9 @@ export class UsersController {
       ),
     );
 
-    return this.usersService.findByParams(cleanParams);
+    const user = await this.usersService.findByParams(cleanParams);
+    if (!user) return null;
+    const userObj = user.toObject ? user.toObject() : user;
+    return excludePassword(userObj);
   }
 }

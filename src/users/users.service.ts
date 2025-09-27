@@ -12,7 +12,7 @@ export class UsersService {
     email: string;
     mobile: string;
     password: string;
-  }): Promise<User> {
+  }): Promise<UserDocument> {
     try {
       // Password will be automatically hashed by the schema pre-save hook
       return await this.userModel.create(userData);
@@ -22,7 +22,7 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<UserDocument[]> {
     try {
       return await this.userModel.find().exec();
     } catch (error) {
@@ -31,7 +31,7 @@ export class UsersService {
     }
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string): Promise<UserDocument | null> {
     try {
       return await this.userModel.findById(id).exec();
     } catch (error) {
@@ -40,7 +40,7 @@ export class UsersService {
     }
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<UserDocument | null> {
     try {
       return await this.userModel.findOne({ email }).exec();
     } catch (error) {
@@ -49,7 +49,7 @@ export class UsersService {
     }
   }
 
-  async findByMobile(mobile: string): Promise<User | null> {
+  async findByMobile(mobile: string): Promise<UserDocument | null> {
     try {
       return await this.userModel.findOne({ mobile }).exec();
     } catch (error) {
@@ -66,7 +66,7 @@ export class UsersService {
       mobile: string;
       password: string;
     }>,
-  ): Promise<User | null> {
+  ): Promise<UserDocument | null> {
     try {
       return await this.userModel
         .findByIdAndUpdate(id, updateData, { new: true })
@@ -100,7 +100,7 @@ export class UsersService {
     mobile?: string;
     password?: string;
     id?: string;
-  }): Promise<User | null> {
+  }): Promise<UserDocument | null> {
     try {
       if (!params || Object.keys(params).length === 0) {
         throw new Error('At least one search parameter is required');
@@ -128,14 +128,14 @@ export class UsersService {
   async validatePassword(
     email: string,
     password: string,
-  ): Promise<User | null> {
+  ): Promise<UserDocument | null> {
     try {
       const user = await this.findByEmail(email);
       if (!user) {
         return null;
       }
 
-      const isValid = await (user as UserDocument).comparePassword(password);
+      const isValid = await user.comparePassword(password);
       return isValid ? user : null;
     } catch (error) {
       console.error('Error validating password:', error);

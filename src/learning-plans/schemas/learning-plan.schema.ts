@@ -3,10 +3,16 @@ import { Document, Types } from 'mongoose';
 
 export type LearningPlanDocument = LearningPlan & Document;
 
+export interface Topic {
+  title: string;
+  status: boolean;
+}
+
 export interface Phase {
   focus: string;
+  status: boolean;
   duration: string;
-  topics: string[];
+  topics: Topic[];
 }
 
 @Schema({
@@ -27,8 +33,14 @@ export class LearningPlan {
     type: [
       {
         focus: { type: String, required: true },
+        status: { type: Boolean, default: false },
         duration: { type: String, required: true },
-        topics: { type: [String], required: true },
+        topics: [
+          {
+            title: { type: String, required: true },
+            status: { type: Boolean, default: false },
+          },
+        ],
       },
     ],
     required: true,

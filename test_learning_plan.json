@@ -1,0 +1,37 @@
+{
+  "title": "Java Spring Boot Development",
+  "duration": "8",
+  "prerequisites": [
+    "Java Fundamentals",
+    "Basic understanding of HTTP and RESTful principles"
+  ],
+  "phases": [
+    {
+      "focus": "Spring Core & IoC/DI",
+      "duration": "2",
+      "topics": [
+        "Introduction to Spring Framework",
+        {
+          "title": "Understanding Inversion of Control (IoC)",
+          "status": true
+        },
+        "Spring Bean lifecycle and scopes",
+        {
+          "title": "Configuration methods",
+          "status": false
+        }
+      ]
+    },
+    {
+      "focus": "Spring Boot Fundamentals",
+      "status": true,
+      "duration": "2",
+      "topics": [
+        "Introduction to Spring Boot",
+        "Auto-configuration and Starters",
+        "Creating a basic Spring Boot application"
+      ]
+    }
+  ],
+  "userId": "66f4a5e0f1b2c3d4e5f67890"
+}

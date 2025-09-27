@@ -29,8 +29,8 @@ export class OpenaiService {
       const response = await this.openai.chat.completions.create({
         model: this.model,
         messages,
-        max_tokens: 150,
-        temperature: 0.7,
+        max_tokens: 5000,
+        temperature: 0.5,
       });
 
       return {

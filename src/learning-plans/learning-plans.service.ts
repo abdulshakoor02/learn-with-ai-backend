@@ -14,12 +14,40 @@ export class LearningPlansService {
 
   async create(createLearningPlanDto: CreateLearningPlanDto): Promise<LearningPlan> {
     try {
-      const createdLearningPlan = new this.learningPlanModel(createLearningPlanDto);
+      // Transform the phases data to handle string topics conversion
+      const transformedData = this.transformPhasesData(createLearningPlanDto);
+      
+      const createdLearningPlan = new this.learningPlanModel(transformedData);
       return await createdLearningPlan.save();
     } catch (error) {
       console.error('Error creating learning plan:', error);
       throw error;
     }
+  }
+
+  private transformPhasesData(data: CreateLearningPlanDto): CreateLearningPlanDto {
+    return {
+      ...data,
+      phases: data.phases.map(phase => ({
+        focus: phase.focus,
+        status: phase.status ?? false, // Default to false if not provided
+        duration: phase.duration,
+        topics: phase.topics.map(topic => {
+          // Handle both string and object formats for topics
+          if (typeof topic === 'string') {
+            return {
+              title: topic,
+              status: false
+            };
+          } else {
+            return {
+              title: topic.title,
+              status: topic.status ?? false // Default to false if not provided
+            };
+          }
+        })
+      }))
+    };
   }
 
   async findAll(): Promise<LearningPlan[]> {
