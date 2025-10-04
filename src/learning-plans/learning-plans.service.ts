@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { LearningPlan, LearningPlanDocument } from './schemas/learning-plan.schema';
+import {
+  LearningPlan,
+  LearningPlanDocument,
+} from './schemas/learning-plan.schema';
 import { CreateLearningPlanDto } from './dto/create-learning-plan.dto';
 import { UpdateLearningPlanDto } from './dto/update-learning-plan.dto';
 import { UpdatePhaseStatusDto } from './dto/update-phase-status.dto';
@@ -14,11 +17,13 @@ export class LearningPlansService {
     private learningPlanModel: Model<LearningPlanDocument>,
   ) {}
 
-  async create(createLearningPlanDto: CreateLearningPlanDto): Promise<LearningPlan> {
+  async create(
+    createLearningPlanDto: CreateLearningPlanDto,
+  ): Promise<LearningPlan> {
     try {
       // Transform the phases data to handle string topics conversion
       const transformedData = this.transformPhasesData(createLearningPlanDto);
-      
+
       const createdLearningPlan = new this.learningPlanModel(transformedData);
       return await createdLearningPlan.save();
     } catch (error) {
@@ -27,28 +32,30 @@ export class LearningPlansService {
     }
   }
 
-  private transformPhasesData(data: CreateLearningPlanDto): CreateLearningPlanDto {
+  private transformPhasesData(
+    data: CreateLearningPlanDto,
+  ): CreateLearningPlanDto {
     return {
       ...data,
-      phases: data.phases.map(phase => ({
+      phases: data.phases.map((phase) => ({
         focus: phase.focus,
         status: phase.status ?? false, // Default to false if not provided
         duration: phase.duration,
-        topics: phase.topics.map(topic => {
+        topics: phase.topics.map((topic) => {
           // Handle both string and object formats for topics
           if (typeof topic === 'string') {
             return {
               title: topic,
-              status: false
+              status: false,
             };
           } else {
             return {
               title: topic.title,
-              status: topic.status ?? false // Default to false if not provided
+              status: topic.status ?? false, // Default to false if not provided
             };
           }
-        })
-      }))
+        }),
+      })),
     };
   }
 
@@ -94,11 +101,11 @@ export class LearningPlansService {
       const updatedLearningPlan = await this.learningPlanModel
         .findByIdAndUpdate(id, updateLearningPlanDto, { new: true })
         .exec();
-      
+
       if (!updatedLearningPlan) {
         throw new NotFoundException(`Learning plan with ID ${id} not found`);
       }
-      
+
       return updatedLearningPlan;
     } catch (error) {
       console.error('Error updating learning plan:', error);
@@ -124,17 +131,25 @@ export class LearningPlansService {
   ): Promise<LearningPlan> {
     try {
       const { learningPlanId, phaseName, status } = updatePhaseStatusDto;
-      
+
       // First, check if the learning plan exists
-      const learningPlan = await this.learningPlanModel.findById(learningPlanId).exec();
+      const learningPlan = await this.learningPlanModel
+        .findById(learningPlanId)
+        .exec();
       if (!learningPlan) {
-        throw new NotFoundException(`Learning plan with ID ${learningPlanId} not found`);
+        throw new NotFoundException(
+          `Learning plan with ID ${learningPlanId} not found`,
+        );
       }
 
       // Check if the phase exists
-      const phaseExists = learningPlan.phases.some(phase => phase.focus === phaseName);
+      const phaseExists = learningPlan.phases.some(
+        (phase) => phase.focus === phaseName,
+      );
       if (!phaseExists) {
-        throw new NotFoundException(`Phase with name '${phaseName}' not found in learning plan`);
+        throw new NotFoundException(
+          `Phase with name '${phaseName}' not found in learning plan`,
+        );
       }
 
       // Update the phase status using MongoDB positional operator
@@ -142,14 +157,14 @@ export class LearningPlansService {
         .findOneAndUpdate(
           {
             _id: learningPlanId,
-            'phases.focus': phaseName
+            'phases.focus': phaseName,
           },
           {
             $set: {
-              'phases.$.status': status
-            }
+              'phases.$.status': status,
+            },
           },
-          { new: true }
+          { new: true },
         )
         .exec();
 
@@ -169,24 +184,30 @@ export class LearningPlansService {
   ): Promise<LearningPlan> {
     try {
       const { learningPlanId, topicTitle, status } = updateTopicStatusDto;
-      
+
       // First, check if the learning plan exists
-      const learningPlan = await this.learningPlanModel.findById(learningPlanId).exec();
+      const learningPlan = await this.learningPlanModel
+        .findById(learningPlanId)
+        .exec();
       if (!learningPlan) {
-        throw new NotFoundException(`Learning plan with ID ${learningPlanId} not found`);
+        throw new NotFoundException(
+          `Learning plan with ID ${learningPlanId} not found`,
+        );
       }
 
       // Check if the topic exists in any phase
       let topicExists = false;
       for (const phase of learningPlan.phases) {
-        if (phase.topics.some(topic => topic.title === topicTitle)) {
+        if (phase.topics.some((topic) => topic.title === topicTitle)) {
           topicExists = true;
           break;
         }
       }
 
       if (!topicExists) {
-        throw new NotFoundException(`Topic with title '${topicTitle}' not found in learning plan`);
+        throw new NotFoundException(
+          `Topic with title '${topicTitle}' not found in learning plan`,
+        );
       }
 
       // Update the topic status using MongoDB array filters
@@ -197,15 +218,13 @@ export class LearningPlansService {
           },
           {
             $set: {
-              'phases.$[].topics.$[topic].status': status
-            }
+              'phases.$[].topics.$[topic].status': status,
+            },
           },
           {
-            arrayFilters: [
-              { 'topic.title': topicTitle }
-            ],
-            new: true
-          }
+            arrayFilters: [{ 'topic.title': topicTitle }],
+            new: true,
+          },
         )
         .exec();
 

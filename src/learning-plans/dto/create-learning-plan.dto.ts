@@ -1,4 +1,12 @@
-import { IsString, IsArray, ValidateNested, IsNotEmpty, IsMongoId, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  ValidateNested,
+  IsNotEmpty,
+  IsMongoId,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class TopicDto {

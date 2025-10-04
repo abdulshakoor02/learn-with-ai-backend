@@ -47,11 +47,13 @@ export class UsersController {
   @Get()
   async findAll(): Promise<Omit<User, 'password'>[]> {
     const users = await this.usersService.findAll();
-    return users.map(user => excludePassword(user));
+    return users.map((user) => excludePassword(user));
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<Omit<User, 'password'> | null> {
+  async findById(
+    @Param('id') id: string,
+  ): Promise<Omit<User, 'password'> | null> {
     const user = await this.usersService.findById(id);
     if (!user) return null;
     const userObj = user.toObject ? user.toObject() : user;
@@ -59,7 +61,9 @@ export class UsersController {
   }
 
   @Get('email/:email')
-  async findByEmail(@Param('email') email: string): Promise<Omit<User, 'password'> | null> {
+  async findByEmail(
+    @Param('email') email: string,
+  ): Promise<Omit<User, 'password'> | null> {
     const user = await this.usersService.findByEmail(email);
     if (!user) return null;
     const userObj = user.toObject ? user.toObject() : user;
@@ -67,7 +71,9 @@ export class UsersController {
   }
 
   @Get('mobile/:mobile')
-  async findByMobile(@Param('mobile') mobile: string): Promise<Omit<User, 'password'> | null> {
+  async findByMobile(
+    @Param('mobile') mobile: string,
+  ): Promise<Omit<User, 'password'> | null> {
     const user = await this.usersService.findByMobile(mobile);
     if (!user) return null;
     const userObj = user.toObject ? user.toObject() : user;

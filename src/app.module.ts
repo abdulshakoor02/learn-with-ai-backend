@@ -7,6 +7,7 @@ import { OpenaiModule } from './openai/openai.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { LearningPlansModule } from './learning-plans/learning-plans.module';
+import { TopicsModule } from './topics/topics.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { LearningPlansModule } from './learning-plans/learning-plans.module';
     OpenaiModule,
     AuthModule,
     LearningPlansModule,
+    TopicsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
